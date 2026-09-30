@@ -9,15 +9,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Same defaults as basic-sql.ipynb; override with env vars if set.
+#variables from environments
 DBHOST = os.environ.get("DBHOST")
 DBUSER = os.environ.get("DBUSER")
-DBPASS = os.environ.get("DBPASS")  # password on Canvas
-DBNAME = os.environ.get("DBNAME")  # MOCK_DATA lives here
+DBPASS = os.environ.get("DBPASS")  
+DBNAME = os.environ.get("DBNAME") 
 
 def get_data_by_group(value):
-    """runs SELECT returning rows where the `group` column equals value."""
-    logger.info(f"Querying table 'mock' for rows where `group` = '{value}'...")
+    """returns rows where the group column equals value."""
+    logger.info(f"querying table 'mock' for rows where `group` = '{value}'...")
     query = "SELECT * FROM mock WHERE `group` = %s;"
 
     try:
@@ -30,7 +30,6 @@ def get_data_by_group(value):
         )
         cursor = connection.cursor()
 
-        # Execute parameterized query safely using tuple parameter substitution
         cursor.execute(query, (value,))
         results = cursor.fetchall()
 
@@ -39,26 +38,26 @@ def get_data_by_group(value):
         return results
 
     except mysql.connector.Error as er:
-        logger.error(f"Database error executing get_data_by_group: {er}")
+        logger.error(f"error: {er}")
         return None
 
 
 def plot_counts(groupby):
-    """Runs a SELECT ... GROUP BY query counting rows per distinct value of the specified column.
+    """runs a value counts function, gives value counts for each distinct level in the column.
 
-    Args:
+    arguments:
         groupby (str): The name of the column to group rows by (e.g., 'group').
 
-    Returns:
+    returns:
         pd.DataFrame: A DataFrame containing distinct column values and their row counts.
     """
-    logger.info(f"Running GROUP BY query on column '{groupby}'...")
+    logger.info(f"running GROUP BY query on column '{groupby}'...")
 
     # Select column and count rows per distinct group
     query = f"SELECT `{groupby}`, COUNT(*) FROM mock GROUP BY `{groupby}`;"
 
     try:
-        # Establish connection to MySQL database
+        # connect to MySQL database
         connection = mysql.connector.connect(
             host=DBHOST,
             user=DBUSER,
@@ -67,31 +66,31 @@ def plot_counts(groupby):
         )
         cursor = connection.cursor()
 
-        # Execute GROUP BY aggregation query
+        # execute GROUP BY aggregation query
         cursor.execute(query)
         results = cursor.fetchall()
 
-        logger.info(f"Successfully calculated row counts grouped by '{groupby}'.")
+        logger.info(f" calculated row counts grouped by '{groupby}'.")
         connection.close()
 
-        # Construct and return pandas DataFrame with aggregated results
+        # return pandas DataFrame with results
         df = pd.DataFrame(results, columns=[groupby, "count"])
         return df
 
     except mysql.connector.Error as er:
-        logger.error(f"Database error executing plot_counts: {er}")
+        logger.error(f" error: {er}")
         return None
 
 
 def main():
     """Calls query functions to demonstrate filtering by 'group11' and displaying group counts."""
     # 1. Fetch and print rows specifically for 'group 1'
-    print("=== Rows where group = 'group 1' ===")
+    print(" rows where group = 'group 1'")
     group1_results = get_data_by_group("group1")
     print(group1_results)
 
     # 2. Get and print value counts grouped only by the 'group' column
-    print("\n=== Row Counts Grouped by 'group' ===")
+    print(" Row Counts Grouped by 'group'")
     group_counts = plot_counts("group")
     print(group_counts)
 
