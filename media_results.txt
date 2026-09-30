@@ -1,0 +1,11 @@
+username	age	likes
+elliot	19	1
+elliot	19	3
+jimmy	19	43
+jimmy	19	432
+harish	19	43
+jun	19	5
+diego	19	4134
+prabhav	20	64
+anirudh	24	56
+ajitesh	32	656
